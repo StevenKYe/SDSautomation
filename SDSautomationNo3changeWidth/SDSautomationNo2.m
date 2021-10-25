@@ -1,6 +1,6 @@
 % Run Comsol server with this command:
 % "C:\Program Files\COMSOL\COMSOL56\Multiphysics\bin\win64\comsolmphserver.exe" -port 12345 -autosave off
-% Simulate the Brillouin gain when the width changes from 2300nm to 3600nm
+% Simulate the Brillouin gain when the width changes from 2300nm to 4200nm
 
 clc;
 clear all;
@@ -13,9 +13,9 @@ import com.comsol.model.util.*
 
 % mphstart(12345);
 
-freq_span = linspace(13.59, 13.64, 11);
+freq_span = linspace(13.60, 13.65, 11);
 SBSgain = zeros(1, length(freq_span));
-w = 3600;
+w = 4200;
 
 model = mphload('..\nlnp2021stevenSDS(formatlab).mph');
 model.result('pg2').set('data', 'dset4');
@@ -50,16 +50,16 @@ disp(['SBSgain @' num2str(freq_acous) 'GHz is :' num2str(SBSgain(i))]);
 toc;
 
 model.result.export('img1').set('sourceobject', 'pg2');
-model.result.export('img1').set('pngfilename', ['SDSautomationNo3changeWidth\results\singlePoint(3600nm)\' 'acoustic\imag(u_tZ) @' num2str(freq_acous) 'GHz']);
+model.result.export('img1').set('pngfilename', ['SDSautomationNo3changeWidth\results\singlePoint(4200nm)\' 'acoustic\imag(u_tZ) @' num2str(freq_acous) 'GHz']);
 model.result.export('img2').set('sourceobject', 'pg3');
-model.result.export('img2').set('pngfilename', ['SDSautomationNo3changeWidth\results\singlePoint(3600nm)\' 'force\imag(f_z)@' num2str(freq_acous) 'GHz']);
+model.result.export('img2').set('pngfilename', ['SDSautomationNo3changeWidth\results\singlePoint(4200nm)\' 'force\imag(f_z)@' num2str(freq_acous) 'GHz']);
 model.result.export('img1').run();
 model.result.export('img2').run();
 end
 
-writematrix([freq_span.', SBSgain.'], 'singlePoint(3600nm)\SBSgain3600nm.csv');
+writematrix([freq_span.', SBSgain.'], 'results\singlePoint(4200nm)\SBSgain4200nm.csv');
 plot(freq_span, SBSgain);
-saveas(gcf, 'singlePoint(3600nm)\SBSgain3600nm.png');
+saveas(gcf, 'results\singlePoint(4200nm)\SBSgain4200nm.png');
 
 clear model;
 
