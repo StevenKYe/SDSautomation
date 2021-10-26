@@ -35,7 +35,8 @@ function maxGain = runCOMSOL(geom)
     % Config the COMSOL model and trial run the optical model
     model.param.set('w', [num2str(geom.w) ' [nm]']);
     model.param.set('tint', [num2str(geom.tint) ' [nm]']);
-    model.param.set('tint_up', [num2str(geom.tintup) ' [nm]']);
+    model.param.set('tint_up', [num2str(geom.tint+geom.tg) ' [nm]']);
+    model.param.set('t_c', [num2str(geom.tc) ' [nm]'])
     model.param.set('t_g1', [num2str(geom.tg) ' [nm]']);
     model.param.set('t_g2', [num2str(geom.tg) ' [nm]']);
     freq_center = freq_span(round(length(freq_span)/2));

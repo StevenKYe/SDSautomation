@@ -1,0 +1,16 @@
+% Create the random genes for each sample
+
+clc;
+clear all;
+close all;
+
+format long;
+
+% genetic pool for the first generation
+tg_span = [160, 170, 180, 190];
+tint_span = [450, 470, 490, 510];
+tc_span = [7.8, 7.9, 8.0, 8.1];
+w_span = [2800, 2900, 3000, 3100];
+
+population = 20; % Population for the genetic evolution
+samples(population) = struct('tg',repmat({zeros(3)}, 100, 1), 'tint', {repmat(0,1,population)}, 'tc', 'w');
