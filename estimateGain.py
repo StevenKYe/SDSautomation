@@ -34,5 +34,9 @@ def estGain(n, p12, lamb, rho, f_acous, fwhm):
     '''
     return 4 * pi * n**8 * p12**2 / (c * lamb**3 * rho * f_acous * fwhm)
 
-est_nitride = estGain(1.98, 0.047, 1550 * 10**(-9), 3020, 20.84*10**9, 50*10**6)
-est_silica = estGain(1.48, 0.27, 1550 * 10**(-9), 2240, 10.752*10**9, 50*10**6)
+
+Aeff = 1.002 * 10**(-11)
+est_nitride = estGain(1.98, 0.047, 1550 * 10**(-9),
+                      3020, 20.84*10**9, 50*10**6)
+est_silica = estGain(1.48, 0.27, 1550 * 10**(-9),
+                     2240, 10.752*10**9, 50*10**6)
