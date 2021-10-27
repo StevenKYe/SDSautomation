@@ -25,6 +25,9 @@ for i = 1:population
     samples.w(i) = w_span(randi(4));
 end
 
+% Check and remove the redundant
+samples = unique(samples, 'rows', 'first');
+
 candidates = samples; % Candidates of the first generation
 
 % % Calculate the SBS gain of each sample in the first generation
@@ -34,25 +37,44 @@ candidates = samples; % Candidates of the first generation
 %     maxgain.freq(i) = output.freq;
 % end
 
-% Select samples with the 10 largest SBS gain
-[~, ind] = maxk(candidates.gain, 10);
+% Select half of the candidates with the highest gain
+[~, ind] = maxk(candidates.gain, height(candidates) / 2);
 elites = candidates(ind, :);
-kids = [];
+kids = zeros(height(elites), width(elites));
+kids = array2table(kids);
+kids.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
 
-% Generate 10 other candidates from the elites
+% Generate the other half of the candidates from the elites
 for i = 1:height(elites) / 2
     j = randperm(height(elites), 2); % Randomly select two elites
     kidsA = elites(j(1), :);
     kidsB = elites(j(2), :);
-    propInd = randi(4); % Randomly determine which property to swap
+    kidsA(1, [5, 6]) = table(0, 0); % Initialize the gain and corresponding frequencies of kidsA
+    kidsB(1, [5, 6]) = table(0, 0); % Initialize the gain and corresponding frequencies of kidsB
+    diffProp = find(kidsA{:, :} - kidsB{:, :}); % Get the different parameters between A and B
+    propInd = diffProp(randi(length(diffProp))); % Randomly determine which property to swap
     propValue = kidsA(1, propInd);
     kidsA(1, propInd) = kidsB(1, propInd);
     kidsB(1, propInd) = propValue;
-    kidsA.gain = 0;
-    kidsA.freq = 0;
-    kidsB.gain = 0;
-    kidsB.freq = 0;
-    kids = [kids; kidsA; kidsB];
+    kids(2 * i - 1, :) = kidsA;
+    kids(2 * i, :) = kidsB;
 end
 
-candidates = [elites; kids];
+% mutatate the kids
+for i = 1:height(kids)
+    j = randi(100);
+
+    if (j > 50) && (j < 65) % mutation probability is 14 %
+        k = randi(4); % randomly select one of the four freedoms to mutate
+
+        if mod(j, 2) == 1
+            kids(i, k) = table(kids{i, k} * 1.1);
+        else
+            kids(i, k) = table(kids{i, k} / 1.1);
+        end
+
+    end
+
+end
+
+candidates = [elites; kids]; % candidates for the next generation
