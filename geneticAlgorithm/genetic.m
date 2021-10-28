@@ -6,15 +6,17 @@ close all;
 
 format long;
 
+mphstart(12345);
+
 % Genetic pool for the first generation
-tg_span = linspace(160, 190, 31);
-tint_span = linspace(450, 510, 13);
-tc_span = linspace(7.8, 8.3, 51);
-w_span = linspace(2800, 3100, 31);
+tg_span = linspace(160, 190, 7);
+tint_span = linspace(450, 550, 11);
+tc_span = linspace(7.8, 8.3, 26);
+w_span = linspace(2600, 3400, 17);
 
 population = 20; % Population for the genetic evolution
 candidates = table(zeros(population, 1), zeros(population, 1), ...
-    zeros(population, 1), zeros(population, 1), rand(population, 1), rand(population, 1)); % table that store the geometry of the candidates
+    zeros(population, 1), zeros(population, 1), zeros(population, 1), zeros(population, 1)); % table that store the geometry of the candidates
 candidates.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
 
 % Generate the first generation
@@ -25,33 +27,54 @@ for i = 1:population
     candidates.w(i) = w_span(randi(length(w_span)));
 end
 
-samples = table(zeros(130, 1), zeros(130, 1), ...
-    zeros(130, 1), zeros(130, 1), zeros(130, 1), zeros(130, 1));
+rounds = 10; % 10 rounds for evolutions
+poll = population + (rounds - 1) * 10; % Total number of samples
+samples = table(zeros(poll, 1), zeros(poll, 1), ...
+    zeros(poll, 1), zeros(poll, 1), zeros(poll, 1), zeros(poll, 1));
 
-samples(linspace(1, 20, 20), :) = candidates; % Candidates of the first generation
+samples(linspace(1, population, population), :) = candidates; % Candidates of the first generation
 samples.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
 
-% 10 rounds for evolutions
-for rounds = 1:10
-    new = find(~candidates.gain); % Find the new candidates whose gain haven't been calculated
+for round = 1:rounds
+    fprintf(['The ' num2str(round) 'st round evolutions\n']);
+    fprintf(['There are ' num2str(height(candidates)) ' candidates.\n']);
+    newCandis = find(~candidates.gain); % Find the new candidates whose gain haven't been calculated
 
-    if new
+    % Calculate the SBS gain of the candidates
+    for i = 1:length(newCandis)
+        geom = table2struct(candidates(newCandis(i), :)); % newCandis(i) is the index of the newCandis candidate
 
-        % Calculate the SBS gain of the candidates
-        for i = 1:length(new)
-            geom = table2struct(candidates(new(i), :)); % new(i) is the index of the new candidate
-            % output = runCOMSOL(geom);
-            % candidates.gain(new(i)) = output.gain;
-            % candidates.freq(new(i)) = output.freq;
-            candidates.gain(new(i)) = rand(1);
-            candidates.freq(new(i)) = 0;
-        end
-        find(~samples.tg)(1);
+        % Run COMSOL to get the real results
+        SBS = runCOMSOL(geom);
+        candidates.gain(newCandis(i)) = SBS.gain;
+        candidates.freq(newCandis(i)) = SBS.freq;
+        fprintf([num2str(i) '/' num2str(length(newCandis)) 'in this round.\n']);
+
+        % code for trial run
+        % candidates.gain(newCandis(i)) = rand(1);
+        % candidates.freq(newCandis(i)) = 0;
     end
 
+    firstZero = find(~samples.gain); % find the pointer to store infomation of new samples in the 'samples' array
+    samples(linspace(firstZero(1), firstZero(1) + length(newCandis) - 1, length(newCandis)), :) = candidates(newCandis, :);
+
     % Select half of the candidates with the highest gain
-    [~, ind] = maxk(candidates.gain, height(candidates) / 2);
-    elites = candidates(ind, :);
+    [~, index] = unique(candidates(:, [1, 2, 3, 4]), 'stable');
+    candidates = candidates(index, :);
+    [~, index2] = maxk(candidates.gain, population / 2);
+    elites = candidates(index2, :);
+
+    % Display the infomation of the maximum gain
+    champion = elites(1, :);
+    fprintf(['The maximum SBS gain so far is ' num2str(champion.gain) ' @ ' num2str(champion.freq) 'GHz.\n']);
+    fprintf('The geometry of that design is: \n');
+    fprintf(['t_g@' num2str(champion.tg) 'nm;\t t_int@' num2str(champion.tint) ...
+            'nm;\t t_c@' num2str(champion.tc * 1000) 'nm;\t w@' num2str(champion.w) 'nm;\n\n']);
+
+    if height(elites) < height(candidates) / 2
+        disp('error');
+    end
+
     kids = zeros(height(elites), width(elites));
     kids = array2table(kids);
     kids.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
@@ -68,12 +91,6 @@ for rounds = 1:10
         if diffProp
             propInd = diffProp(randi(length(diffProp))); % Randomly determine which property to swap
             propValue = kidsA(1, propInd);
-
-            if ~propValue{:, :}
-                disp(num2str(propInd));
-                error('ERROR');
-            end
-
             kidsA(1, propInd) = kidsB(1, propInd);
             kidsB(1, propInd) = propValue;
             kids(2 * i1 - 1, :) = kidsA;

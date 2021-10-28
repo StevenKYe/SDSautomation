@@ -14,7 +14,7 @@ function maxGain = runCOMSOL(geom)
 
     format long;
 
-    freq_span = linspace(13.50, 13.65, 31);
+    freq_span = linspace(13.50, 13.65, 2);
     SBSgain = zeros(1, length(freq_span));
 
     model = mphload('..\nlnp2021stevenSDS(formatlab).mph');
@@ -36,14 +36,14 @@ function maxGain = runCOMSOL(geom)
     model.param.set('w', [num2str(geom.w) ' [nm]']);
     model.param.set('tint', [num2str(geom.tint) ' [nm]']);
     model.param.set('tint_up', [num2str(geom.tint+geom.tg) ' [nm]']);
-    model.param.set('t_c', [num2str(geom.tc) ' [nm]'])
+    model.param.set('t_c', [num2str(geom.tc) ' [um]'])
     model.param.set('t_g1', [num2str(geom.tg) ' [nm]']);
     model.param.set('t_g2', [num2str(geom.tg) ' [nm]']);
     freq_center = freq_span(round(length(freq_span)/2));
     model.param.set('freq_acous', [num2str(freq_center) ' [GHz]']);
     fprintf('Configurations of the running model\n');
     fprintf(['Width: ' num2str(geom.w) ' nm\t' 'Thickness: ' num2str(geom.tg) ' nm\n']); 
-    fprintf(['Seperation: ' num2str(geom.tint) ' nm\t' 'Distance to center: ' num2str(geom.tintup) ' nm\n'])
+    fprintf(['Seperation: ' num2str(geom.tint) ' nm\t' 'Distance to center: ' num2str(geom.tint+geom.tg) ' nm\n'])
     model.study('std1').run();
     
     tic;
@@ -61,7 +61,7 @@ function maxGain = runCOMSOL(geom)
             maxGain.freq = freq_span(i);
         end
         fprintf(['SBSgain @' num2str(freq_acous) 'GHz is ' num2str(SBSgain(i)) '\n']);
-        fprintf(['The maximum gain until now is ' num2str(maxGain.gain) ' @ ' num2str(maxGain.freq) ' GHz\n'])
+        fprintf(['The maximum gain (until now) for this model is ' num2str(maxGain.gain) ' @ ' num2str(maxGain.freq) ' GHz\n'])
         toc;
 
         model.result.export('img1').set('sourceobject', 'pg2');
