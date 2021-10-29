@@ -6,7 +6,7 @@ close all;
 
 format long;
 
-mphstart(12345);
+% mphstart(12345);
 
 % Genetic pool for the first generation
 tg_span = linspace(160, 190, 7);
@@ -35,8 +35,8 @@ samples = table(zeros(poll, 1), zeros(poll, 1), ...
 samples(linspace(1, population, population), :) = candidates; % Candidates of the first generation
 samples.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
 
-for round = 1:rounds
-    fprintf(['The ' num2str(round) 'st round evolutions\n']);
+for singleRound = 1:rounds
+    fprintf(['The ' num2str(singleRound) 'st round evolutions\n']);
     fprintf(['There are ' num2str(height(candidates)) ' candidates.\n']);
     newCandis = find(~candidates.gain); % Find the new candidates whose gain haven't been calculated
 
@@ -66,7 +66,7 @@ for round = 1:rounds
 
     % Display the infomation of the maximum gain
     champion = elites(1, :);
-    fprintf(['The maximum SBS gain so far is ' num2str(champion.gain) ' @ ' num2str(champion.freq) 'GHz.\n']);
+    fprintf(['\n The maximum SBS gain (until now) in all samples is ' num2str(champion.gain) ' @ ' num2str(champion.freq) 'GHz.\n']);
     fprintf('The geometry of that design is: \n');
     fprintf(['t_g@' num2str(champion.tg) 'nm;\t t_int@' num2str(champion.tint) ...
             'nm;\t t_c@' num2str(champion.tc * 1000) 'nm;\t w@' num2str(champion.w) 'nm;\n\n']);

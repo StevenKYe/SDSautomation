@@ -6,6 +6,8 @@ close all;
 
 format long;
 
+mphstart(12345);
+
 % Genetic pool for the first generation
 tg_span = linspace(160, 190, 7);
 tint_span = linspace(450, 550, 11);
@@ -34,20 +36,23 @@ samples(linspace(1, population, population), :) = candidates; % Candidates of th
 samples.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
 
 for round = 1:rounds
-    fprintf(['The ' num2str(round) 'round evolutions\n']);
-    fprintf(['There are ' num2str(height(candidates)) 'candidates.']);
+    fprintf(['The ' num2str(round) 'st round evolutions\n']);
+    fprintf(['There are ' num2str(height(candidates)) ' candidates.\n']);
     newCandis = find(~candidates.gain); % Find the new candidates whose gain haven't been calculated
 
     % Calculate the SBS gain of the candidates
     for i = 1:length(newCandis)
         geom = table2struct(candidates(newCandis(i), :)); % newCandis(i) is the index of the newCandis candidate
-        % SBS = runCOMSOL(geom);
-        % candidates.gain(newCandis(i)) = SBS.gain;
-        % candidates.freq(newCandis(i)) = SBS.freq;
+
+        % Run COMSOL to get the real results
+        SBS = runCOMSOL(geom);
+        candidates.gain(newCandis(i)) = SBS.gain;
+        candidates.freq(newCandis(i)) = SBS.freq;
+        fprintf([num2str(i) '/' num2str(length(newCandis)) 'in this round.\n']);
 
         % code for trial run
-        candidates.gain(newCandis(i)) = rand(1);
-        candidates.freq(newCandis(i)) = 0;
+        % candidates.gain(newCandis(i)) = rand(1);
+        % candidates.freq(newCandis(i)) = 0;
     end
 
     firstZero = find(~samples.gain); % find the pointer to store infomation of new samples in the 'samples' array
@@ -58,12 +63,14 @@ for round = 1:rounds
     candidates = candidates(index, :);
     [~, index2] = maxk(candidates.gain, population / 2);
     elites = candidates(index2, :);
-    
+
     % Display the infomation of the maximum gain
-    fprintf(['The maximum SBS gain so far is ' num2str() ' @' num2str() ' GHz.\n']);
+    champion = elites(1, :);
+    fprintf(['The maximum SBS gain (until now) in all samples is ' num2str(champion.gain) ' @ ' num2str(champion.freq) 'GHz.\n']);
     fprintf('The geometry of that design is: \n');
-    fprintf(['t_g @' num2str() ';\t' 't_int @' num2str() ';\t' 't_c @' num2str() ';\t' 'w @' num2str() ';\t']);
-    
+    fprintf(['t_g@' num2str(champion.tg) 'nm;\t t_int@' num2str(champion.tint) ...
+            'nm;\t t_c@' num2str(champion.tc * 1000) 'nm;\t w@' num2str(champion.w) 'nm;\n\n']);
+
     if height(elites) < height(candidates) / 2
         disp('error');
     end

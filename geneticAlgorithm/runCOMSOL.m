@@ -43,7 +43,7 @@ function maxGain = runCOMSOL(geom)
     model.param.set('freq_acous', [num2str(freq_center) ' [GHz]']);
     fprintf('Configurations of the running model\n');
     fprintf(['Width: ' num2str(geom.w) ' nm\t' 'Thickness: ' num2str(geom.tg) ' nm\n']); 
-    fprintf(['Seperation: ' num2str(geom.tint) ' nm\t' 'Distance to center: ' num2str(geom.tint+geom.tg) ' nm\n'])
+    fprintf(['Seperation: ' num2str(geom.tint) ' nm\t' 'Top cladding thickness: ' num2str(geom.tc * 1000) ' nm\n\n'])
     model.study('std1').run();
     
     tic;

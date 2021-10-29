@@ -14,3 +14,4 @@ This project aims at optimizing the SDS geometry to find the highest SBS gain.
 
 ## Issues
 - [x] diffProp could become zero after several rounds
+- [ ] runCOMSOL result doesn't match with the appliction results
