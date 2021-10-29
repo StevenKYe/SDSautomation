@@ -34,6 +34,7 @@ samples = table(zeros(poll, 1), zeros(poll, 1), ...
 
 samples(linspace(1, population, population), :) = candidates; % Candidates of the first generation
 samples.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
+tic;
 
 for singleRound = 1:rounds
     fprintf(['The ' num2str(singleRound) 'st round evolutions\n']);
@@ -49,7 +50,7 @@ for singleRound = 1:rounds
         candidates.gain(newCandis(i)) = SBS.gain;
         candidates.freq(newCandis(i)) = SBS.freq;
         fprintf([num2str(i) '/' num2str(length(newCandis)) 'in this round.\n']);
-
+        toc;
         % code for trial run
         % candidates.gain(newCandis(i)) = rand(1);
         % candidates.freq(newCandis(i)) = 0;
