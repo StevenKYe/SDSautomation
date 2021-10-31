@@ -18,6 +18,7 @@ function maxGain = runCOMSOL(geom)
     SBSgain = zeros(1, length(freq_span));
 
     model = mphload('..\nlnp2021stevenSDS(formatlab).mph');
+    % Clean up all solution data
     model.sol('sol1').clearSolutionData();
     model.sol('sol2').clearSolutionData();
     model.sol('sol3').clearSolutionData();
@@ -47,7 +48,6 @@ function maxGain = runCOMSOL(geom)
         fprintf(['The maximum gain (until now) for this model is ' num2str(maxGain.gain) ' @ ' num2str(maxGain.freq) ' GHz\n'])
     end
 
-    % Writematrix([freq_span.', SBSgain.'], ['results\' 'width' num2str(geom.w) 'nm\' num2str(geom.w) '.csv']);
-    % Clean up all solution data
+    Writematrix([freq_span.', SBSgain.'], ['results\' 'width' num2str(geom.w) 'nm\' num2str(geom.w) '.csv']);
     clear model;
 end
