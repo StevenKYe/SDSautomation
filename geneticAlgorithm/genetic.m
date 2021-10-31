@@ -46,10 +46,10 @@ for singleRound = 1:rounds
         geom = table2struct(candidates(newCandis(i), :)); % newCandis(i) is the index of the newCandis candidate
 
         % Run COMSOL to get the real results
+        fprintf(['\n' num2str(i) '/' num2str(length(newCandis)) ' in this round.\n']);
         SBS = runCOMSOL(geom);
         candidates.gain(newCandis(i)) = SBS.gain;
         candidates.freq(newCandis(i)) = SBS.freq;
-        fprintf([num2str(i) '/' num2str(length(newCandis)) 'in this round.\n']);
         toc;
         % code for trial run
         % candidates.gain(newCandis(i)) = rand(1);
@@ -120,4 +120,6 @@ for singleRound = 1:rounds
     end
 
     candidates = [elites; kids]; % candidates for the next generation
+    currentSamples = table2array(samples); % Export the up-to-date results
+    writematrix(currentSamples, 'uptoDateResults.csv');
 end

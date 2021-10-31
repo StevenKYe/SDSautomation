@@ -47,7 +47,7 @@ function maxGain = runCOMSOL(geom)
         fprintf(['SBSgain @' num2str(freq_acous) 'GHz is ' num2str(SBSgain(i)) '\n']);
         fprintf(['The maximum gain (until now) for this model is ' num2str(maxGain.gain) ' @ ' num2str(maxGain.freq) ' GHz\n'])
     end
-
-    Writematrix([freq_span.', SBSgain.'], ['results\' 'width' num2str(geom.w) 'nm\' num2str(geom.w) '.csv']);
+    
+    writematrix([freq_span.', SBSgain.'], ['results\frequencySweep\w' num2str(geom.w) '_tint' num2str(geom.tint) '_tg' num2str(geom.tg) '_tc' num2str(geom.tc*1000) '.csv']);
     clear model;
 end
