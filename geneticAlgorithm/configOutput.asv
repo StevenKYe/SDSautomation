@@ -5,10 +5,10 @@
     clc;
     clear all;
     close all;
-    geom.w = 4000; % Width of the chip
-    geom.tint = 520; % Seperation between the two stripes
-    geom.tc = 6.8; % Thickness of the top cladding, unit: um
-    geom.tg = 170; % Thickness of the stripe, unit: nm
+    geom.w = 3800; % Width of the chip
+    geom.tint = 500; % Seperation between the two stripes
+    geom.tc = 8.04; % Thickness of the top cladding, unit: um
+    geom.tg = 190; % Thickness of the stripe, unit: nm
 
     format long;
 
@@ -48,8 +48,8 @@
     fprintf(['Maximum gain is around ' num2str(freqCenter) 'GHz\n']);
 
     % Fine sweeping
-    freqSpan = linspace(freqCenter + 0.09, freqCenter -0.1, 20);
-    SBSgain = zeros(1, 20);
+    freqSpan = linspace(freqCenter + 0.05, freqCenter -0.05, 11);
+    SBSgain = zeros(1, 5);
     maxGain.gain = 0;
     maxGain.freq = 0;
     [FLAG1, FLAG2] = deal(0,0);
@@ -69,7 +69,7 @@
         end
 
         % Find the maximum gain and the corresponding frequency
-        if FLAG1 == FLAG2
+        if (max(SBSgain(i)) > 0.1) && ((max(SBSgain) - SBSgain(i)) > 0.05)
             maxGain.gain = SBSgain(i - 1);
             maxGain.freq = freqSpan(i - 1);
             fprintf(['The maximum gain (until now) for this model is ' num2str(maxGain.gain) ' @ ' num2str(maxGain.freq) ' GHz\n']);
@@ -78,5 +78,5 @@
 
     end
 
-        writematrix([freqSpan.', SBSgain.'], ['results\frequencySweep\w' num2str(geom.w) '_tint' num2str(geom.tint) '_tg' num2str(geom.tg) '_tc' num2str(geom.tc * 1000) '.csv']);
+    %     writematrix([freqSpan.', SBSgain.'], ['results\frequencySweep\w' num2str(geom.w) '_tint' num2str(geom.tint) '_tg' num2str(geom.tg) '_tc' num2str(geom.tc * 1000) '.csv']);
     clear model;

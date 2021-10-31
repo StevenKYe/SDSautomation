@@ -9,10 +9,10 @@ format long;
 % mphstart(12345);
 
 % Genetic pool for the first generation
-tg_span = linspace(160, 190, 7);
-tint_span = linspace(450, 550, 11);
-tc_span = linspace(7.8, 8.3, 26);
-w_span = linspace(2600, 3400, 17);
+tgSpan = linspace(160, 190, 7);
+tintSpan = linspace(450, 550, 11);
+tcSpan = linspace(7.8, 8.3, 26);
+wSpan = linspace(2600, 3400, 17);
 
 population = 20; % Population for the genetic evolution
 candidates = table(zeros(population, 1), zeros(population, 1), ...
@@ -21,10 +21,10 @@ candidates.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
 
 % Generate the first generation
 for i = 1:population
-    candidates.tg(i) = tg_span(randi(length(tg_span)));
-    candidates.tint(i) = tint_span(randi(length(tint_span)));
-    candidates.tc(i) = tc_span(randi(length(tc_span)));
-    candidates.w(i) = w_span(randi(length(w_span)));
+    candidates.tg(i) = tgSpan(randi(length(tgSpan)));
+    candidates.tint(i) = tintSpan(randi(length(tintSpan)));
+    candidates.tc(i) = tcSpan(randi(length(tcSpan)));
+    candidates.w(i) = wSpan(randi(length(wSpan)));
 end
 
 rounds = 10; % 10 rounds for evolutions

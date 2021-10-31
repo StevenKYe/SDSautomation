@@ -1,10 +1,5 @@
-function newModel = configParas(model, geom, freq_span)
+function newModel = configParas(model, geom)
     % Config the geometry and central frequency of the COMSOL model;
-    freq_center = freq_span(round(length(freq_span) / 2));
-    model.param.set('lambda_pump', '1550 [nm]');
-    model.param.set('freq_pump', 'c_const/lambda_pump');
-    model.param.set('freq_acous', [num2str(freq_center) ' [GHz]']);
-    model.param.set('freq_stokes', 'freq_pump - freq_acous');
     model.param('par2').set('angle_etch', ['82[' native2unicode(hex2dec({'00' 'b0'}), 'unicode') ']'], 'etching angle');
     model.param('par2').set('t_g1', [num2str(geom.tg) ' [nm]']);
     model.param('par2').set('t_g2', [num2str(geom.tg) ' [nm]']);

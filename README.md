@@ -3,7 +3,7 @@ This project aims at optimizing the SDS geometry to find the highest SBS gain.
 
 ## TODO
 - [ ] Add the autodetect neff feature
-- [ ] Add the adaptive search algorithm for SBS gain
+- [x] Add the adaptive search algorithm for SBS gain
 - [x] Create script to visualize the results
 - [X] Create the initial population
 - [X] Create the second generation without mutation

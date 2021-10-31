@@ -14,52 +14,78 @@ function maxGain = runCOMSOL(geom)
 
     format long;
 
-    freq_span = linspace(13.50, 13.65, 2);
-    SBSgain = zeros(1, length(freq_span));
-
     model = mphload('..\nlnp2021stevenSDS(formatlab).mph');
+    % Clean up all solution data
     model.sol('sol1').clearSolutionData();
     model.sol('sol2').clearSolutionData();
     model.sol('sol3').clearSolutionData();
 
     % Config the COMSOL model and trial run the optical model
-    freq_center = freq_span(round(length(freq_span) / 2));
-    model.param.set('lambda_pump', '1550 [nm]');
-    model.param.set('freq_pump', 'c_const/lambda_pump');
-    model.param.set('freq_acous', [num2str(freq_center) ' [GHz]']);
-    model.param.set('freq_stokes', 'freq_pump - freq_acous');
-    model.param.set('t_g1', [num2str(geom.tg) ' [nm]']);
-    model.param.set('t_g2', [num2str(geom.tg) ' [nm]']);
-    model.param.set('tint', [num2str(geom.tint) ' [nm]']);
-    model.param.set('w', [num2str(geom.w) ' [nm]']);
-    model.param.set('t_c', [num2str(geom.tc) ' [um]']);
-    model.param.set('t_intup', [num2str(geom.tg + geom.tint) ' [nm]']);
-    
-
+    model = configParas(model, geom);
+    model.param.set('freqAcous', [num2str(13.5) ' [GHz]']);
     fprintf('Configurations of the running model\n');
     fprintf(['Width: ' num2str(geom.w) ' nm\t' 'Distance to center: ' num2str(geom.tg + geom.tint) ' nm\t' 'Thickness: ' num2str(geom.tg) ' nm\n']);
-    fprintf(['Seperation: ' num2str(geom.tint) ' nm\t' 'Top cladding thickness: ' num2str(geom.tc * 1000) ' nm\n\n'])
+    fprintf(['Seperation: ' num2str(geom.tint) ' nm\t' 'Top cladding thickness: ' num2str(geom.tc * 1000) ' nm\n\n']);
     model.study('std1').run();
 
-    maxGain.gain = 0;
-    maxGain.freq = 0;
-    % Sweep the frequency
-    for i = 1:length(freq_span)
-        freq_acous = freq_span(i);
-        model.param.set('freq_acous', [num2str(freq_acous) ' [GHz]']);
+    % Croase sweeping
+    [k0, k1, k2] = deal(0, 0, 0);
+
+    for i = 1:9
+        freqAcous = 14.0 - 0.25 * i;
+        model.param.set('freqAcous', [num2str(freqAcous) ' [GHz]']);
         model.study('std2').run();
-        SBSgain(i) = mphglobal(model, 'SBSgain', 'dataset', 'dset4');
-        % Store the maximum gain and the corresponding frequency
-        if SBSgain(i) > maxGain.gain
-            maxGain.gain = SBSgain(i);
-            maxGain.freq = freq_span(i);
+        coarseGain = mphglobal(model, 'SBSgain', 'dataset', 'dset4');
+        fprintf(['SBSgain @' num2str(freqAcous) 'GHz is ' num2str(coarseGain) '\n']);
+
+        if mod(i, 3) == 0
+            k0 = coarseGain;
+        elseif mod(i, 3) == 1
+            k1 = coarseGain;
+        elseif mod(i, 3) == 2
+            k2 = coarseGain;
         end
 
-        fprintf(['SBSgain @' num2str(freq_acous) 'GHz is ' num2str(SBSgain(i)) '\n']);
-        fprintf(['The maximum gain (until now) for this model is ' num2str(maxGain.gain) ' @ ' num2str(maxGain.freq) ' GHz\n'])
+        if (mod(i, 3) == 2) && (k1 > k0) && (k1 > k2)
+            freqCenter = freqAcous + 0.25;
+            gainCenter = k1;
+            break;
+        end
+
     end
 
-    % Writematrix([freq_span.', SBSgain.'], ['results\' 'width' num2str(geom.w) 'nm\' num2str(geom.w) '.csv']);
-    % Clean up all solution data
+    fprintf(['Maximum gain is around ' num2str(freqCenter) 'GHz\n']);
+
+    % Fine sweeping
+    freqSpan = [linspace(freqCenter + 0.05, freqCenter + 0.01, 5), freqCenter, linspace(freqCenter - 0.01, freqCenter - 0.05, 5)];
+    SBSgain = [zeros(1, 5), gainCenter, zeros(1, 5)];
+    maxGain.gain = 0;
+    maxGain.freq = 0;
+
+    for i = 1:length(freqSpan)
+
+        if i == 5
+            SBSgain(i) = gainCenter;
+        else
+            freqAcous = freqSpan(i);
+            model.param.set('freqAcous', [num2str(freqAcous) ' [GHz]']);
+            model.study('std2').run();
+            SBSgain(i) = mphglobal(model, 'SBSgain', 'dataset', 'dset4');
+            fprintf(['SBSgain @' num2str(freqAcous) 'GHz is ' num2str(SBSgain(i)) '\n']);
+        end
+
+        % Store the maximum gain and the corresponding frequency
+        if (mod(i, 3) == 2) && (SBSgain(i - 1) > SBSgain(i - 2)) && (SBSgain(i - 1) > SBSgain(i))
+            maxGain.gain = SBSgain(i - 1);
+            maxGain.freq = freqSpan(i - 1);
+            fprintf(['The maximum gain (until now) for this model is ' num2str(maxGain.gain) ' @ ' num2str(maxGain.freq) ' GHz\n']);
+            break;
+        end
+
+    end
+
+    writematrix([freqSpan.', SBSgain.'], ['results\frequencySweep\w' num2str(geom.w) '_tint' num2str(geom.tint) '_tg' num2str(geom.tg) '_tc' num2str(geom.tc * 1000) '.csv']);
     clear model;
 end
+
+
