@@ -65,7 +65,7 @@ function maxGain = runCOMSOL(geom)
         fprintf(['SBSgain @' num2str(freqAcous) 'GHz is ' num2str(SBSgain(i)) '\n']);
         
         if i > 1
-            if SBSgain(i) > SBSgain(i-1)
+            if (SBSgain(i) > SBSgain(i-1)) || (SBSgain(i) < gainCenter)
                 FLAG2 = ~FLAG2;
             end
         end
