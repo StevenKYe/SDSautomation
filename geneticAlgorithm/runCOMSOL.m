@@ -33,7 +33,7 @@ function maxGain = runCOMSOL(geom)
     coarseFreq = zeros(1, 20);
 
     for i = 1:20
-        coarseFreq(i) = 13.8 - 0.1 * i;
+        coarseFreq(i) = 14.0 - 0.1 * i;
         model.param.set('freq_acous', [num2str(coarseFreq(i)) ' [GHz]']);
         model.study('std2').run();
         coarseGain(i) = mphglobal(model, 'SBSgain', 'dataset', 'dset4');
@@ -54,7 +54,7 @@ function maxGain = runCOMSOL(geom)
     SBSgain = zeros(1, 20);
     maxGain.gain = 0;
     maxGain.freq = 0;
-    [FLAG1, FLAG2] = deal(0,0);
+    [FLAG1, FLAG2] = deal(0, 0);
 
     for i = 1:length(freqSpan)
         FLAG1 = ~FLAG1;
@@ -63,11 +63,13 @@ function maxGain = runCOMSOL(geom)
         model.study('std2').run();
         SBSgain(i) = mphglobal(model, 'SBSgain', 'dataset', 'dset4');
         fprintf(['SBSgain @' num2str(freqAcous) 'GHz is ' num2str(SBSgain(i)) '\n']);
-        
+
         if i > 1
-            if (SBSgain(i) > SBSgain(i-1)) || (SBSgain(i) < gainCenter)
+
+            if (SBSgain(i) > SBSgain(i - 1)) || (SBSgain(i) < gainCenter)
                 FLAG2 = ~FLAG2;
             end
+
         end
 
         % Find the maximum gain and the corresponding frequency
@@ -80,9 +82,7 @@ function maxGain = runCOMSOL(geom)
 
     end
 
-        writematrix([freqSpan.', SBSgain.'], ['results\frequencySweep\w' num2str(geom.w) '_tint' num2str(geom.tint) '_tg' num2str(geom.tg) '_tc' num2str(geom.tc * 1000) '.csv']);
+    writematrix([freqSpan.', SBSgain.'], ['results\frequencySweep\w' num2str(geom.w) '_tint' num2str(geom.tint) '_tg' num2str(geom.tg) '_tc' num2str(geom.tc * 1000) '.csv']);
     clear model;
 
 end
-
-

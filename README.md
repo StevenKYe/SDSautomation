@@ -15,3 +15,14 @@ This project aims at optimizing the SDS geometry to find the highest SBS gain.
 ## Issues
 - [x] diffProp could become zero after several rounds
 - [x] runCOMSOL result doesn't match with the appliction results
+
+## Gene pool setting
+### 1st run
+```matlab
+tgSpan = linspace(160, 190, 7);
+tintSpan = linspace(450, 550, 11);
+tcSpan = linspace(7.8, 8.3, 26);
+wSpan = linspace(2600, 3400, 17);
+population = 20; % Population for the genetic evolution
+rounds = 10; % 10 rounds for evolutions
+```
