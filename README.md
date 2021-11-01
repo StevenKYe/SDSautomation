@@ -26,3 +26,13 @@ wSpan = linspace(2600, 3400, 17);
 population = 20; % Population for the genetic evolution
 rounds = 10; % 10 rounds for evolutions
 ```
+
+### 2nd run
+```matlab
+tgSpan = linspace(100, 300, 21);
+tintSpan = linspace(200, 700, 51);
+tcSpan = linspace(7, 8, 51);
+wSpan = linspace(500, 5000, 46);
+population = 200; % Population for the genetic evolution
+rounds = 20; % 20 rounds for evolutions
+```

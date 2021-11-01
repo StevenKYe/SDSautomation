@@ -9,12 +9,12 @@ format long;
 % mphstart(12345);
 
 % Genetic pool for the first generation
-tgSpan = linspace(160, 190, 7);
-tintSpan = linspace(450, 550, 11);
-tcSpan = linspace(7.8, 8.3, 26);
-wSpan = linspace(2600, 3400, 17);
+tgSpan = linspace(100, 300, 21);
+tintSpan = linspace(200, 700, 51);
+tcSpan = linspace(7, 8, 51);
+wSpan = linspace(500, 5000, 46);
 
-population = 20; % Population for the genetic evolution
+population = 6; % Population for the genetic evolution
 candidates = table(zeros(population, 1), zeros(population, 1), ...
     zeros(population, 1), zeros(population, 1), zeros(population, 1), zeros(population, 1)); % table that store the geometry of the candidates
 candidates.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
@@ -27,8 +27,8 @@ for i = 1:population
     candidates.w(i) = wSpan(randi(length(wSpan)));
 end
 
-rounds = 10; % 10 rounds for evolutions
-poll = population + (rounds - 1) * 10; % Total number of samples
+rounds = 20; % 20 rounds for evolutions
+poll = population + (rounds - 1) * (population / 2); % Total number of samples
 samples = table(zeros(poll, 1), zeros(poll, 1), ...
     zeros(poll, 1), zeros(poll, 1), zeros(poll, 1), zeros(poll, 1));
 
@@ -110,9 +110,9 @@ for singleRound = 1:rounds
             k = randi(4); % randomly select one of the four freedoms to mutate
 
             if mod(j2, 2) == 1
-                kids(i2, k) = table(kids{i2, k} * 1.1);
+                kids(i2, k) = table(kids{i2, k} * 1.2);
             else
-                kids(i2, k) = table(kids{i2, k} / 1.05);
+                kids(i2, k) = table(kids{i2, k} / 1.3);
             end
 
         end

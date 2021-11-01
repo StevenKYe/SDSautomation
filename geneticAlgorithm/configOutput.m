@@ -5,10 +5,10 @@
     clc;
     clear all;
     close all;
-    geom.w = 4000; % Width of the chip
-    geom.tint = 520; % Seperation between the two stripes
-    geom.tc = 6.8; % Thickness of the top cladding, unit: um
-    geom.tg = 170; % Thickness of the stripe, unit: nm
+    geom.w = 3100; % Width of the chip
+    geom.tint = 200; % Seperation between the two stripes
+    geom.tc = 7.36; % Thickness of the top cladding, unit: um
+    geom.tg = 160; % Thickness of the stripe, unit: nm
 
     format long;
 
@@ -29,9 +29,10 @@
     % Croase sweeping
     coarseGain = zeros(1, 20);
     coarseFreq = zeros(1, 20);
+    freqCenter = 0;
 
     for i = 1:20
-        coarseFreq(i) = 13.8 - 0.1 * i;
+        coarseFreq(i) = 14.0 - 0.1 * i;
         model.param.set('freq_acous', [num2str(coarseFreq(i)) ' [GHz]']);
         model.study('std2').run();
         coarseGain(i) = mphglobal(model, 'SBSgain', 'dataset', 'dset4');
@@ -46,13 +47,19 @@
     end
 
     fprintf(['Maximum gain is around ' num2str(freqCenter) 'GHz\n']);
+    % If we cannot find Brillouin gain larger than 0.1, than give up that candidate
+    if freqCenter == 0
+        [maxGain.gain, maxGainLoc] = max(coarseGain);
+        maxGain.freq = coarseFreq(gainCenterLoc);
+        return
+    end
 
     % Fine sweeping
     freqSpan = linspace(freqCenter + 0.09, freqCenter -0.1, 20);
     SBSgain = zeros(1, 20);
     maxGain.gain = 0;
     maxGain.freq = 0;
-    [FLAG1, FLAG2] = deal(0,0);
+    [FLAG1, FLAG2] = deal(0, 0);
 
     for i = 1:length(freqSpan)
         FLAG1 = ~FLAG1;
@@ -61,11 +68,13 @@
         model.study('std2').run();
         SBSgain(i) = mphglobal(model, 'SBSgain', 'dataset', 'dset4');
         fprintf(['SBSgain @' num2str(freqAcous) 'GHz is ' num2str(SBSgain(i)) '\n']);
-        
+
         if i > 1
-            if SBSgain(i) > SBSgain(i-1)
+
+            if (SBSgain(i) > SBSgain(i - 1)) || (SBSgain(i) < gainCenter)
                 FLAG2 = ~FLAG2;
             end
+
         end
 
         % Find the maximum gain and the corresponding frequency
@@ -78,5 +87,5 @@
 
     end
 
-        writematrix([freqSpan.', SBSgain.'], ['results\frequencySweep\w' num2str(geom.w) '_tint' num2str(geom.tint) '_tg' num2str(geom.tg) '_tc' num2str(geom.tc * 1000) '.csv']);
+    writematrix([freqSpan.', SBSgain.'], ['results\frequencySweep\w' num2str(geom.w) '_tint' num2str(geom.tint) '_tg' num2str(geom.tg) '_tc' num2str(geom.tc * 1000) '.csv']);
     clear model;

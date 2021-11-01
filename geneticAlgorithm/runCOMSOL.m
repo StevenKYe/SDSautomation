@@ -31,6 +31,7 @@ function maxGain = runCOMSOL(geom)
     % Croase sweeping
     coarseGain = zeros(1, 20);
     coarseFreq = zeros(1, 20);
+    freqCenter = 0;
 
     for i = 1:20
         coarseFreq(i) = 14.0 - 0.1 * i;
@@ -48,6 +49,12 @@ function maxGain = runCOMSOL(geom)
     end
 
     fprintf(['Maximum gain is around ' num2str(freqCenter) 'GHz\n']);
+    % If we cannot find Brillouin gain larger than 0.1, than give up that candidate
+    if freqCenter == 0
+        [maxGain.gain, maxGainLoc] = max(coarseGain);
+        maxGain.freq = coarseFreq(gainCenterLoc);
+        return
+    end
 
     % Fine sweeping
     freqSpan = linspace(freqCenter + 0.09, freqCenter -0.1, 20);
