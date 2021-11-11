@@ -43,16 +43,17 @@ function maxGain = runCOMSOL(geom)
         if (max(coarseGain) > 0.1) && ((max(coarseGain) - coarseGain(i)) > 0.05)
             [gainCenter, gainCenterLoc] = max(coarseGain);
             freqCenter = coarseFreq(gainCenterLoc);
+            fprintf(['Maximum gain is around ' num2str(gainCenter) '@' num2str(freqCenter) 'GHz\n']);
             break;
         end
 
     end
 
-    fprintf(['Maximum gain is around ' num2str(freqCenter) 'GHz\n']);
     % If we cannot find Brillouin gain larger than 0.1, than give up that candidate
     if freqCenter == 0
         [maxGain.gain, maxGainLoc] = max(coarseGain);
-        maxGain.freq = coarseFreq(gainCenterLoc);
+        maxGain.freq = coarseFreq(maxGainLoc);
+        fprintf(['Maximum gain is around ' num2str(maxGain.gain) '@' num2str(maxGain.freq) 'GHz\n']);
         return
     end
 
@@ -66,14 +67,20 @@ function maxGain = runCOMSOL(geom)
     for i = 1:length(freqSpan)
         FLAG1 = ~FLAG1;
         freqAcous = freqSpan(i);
-        model.param.set('freq_acous', [num2str(freqAcous) ' [GHz]']);
-        model.study('std2').run();
-        SBSgain(i) = mphglobal(model, 'SBSgain', 'dataset', 'dset4');
+
+        if freqAcous == freqCenter
+            SBSgain(i) = gainCenter;
+        else
+            model.param.set('freq_acous', [num2str(freqAcous) ' [GHz]']);
+            model.study('std2').run();
+            SBSgain(i) = mphglobal(model, 'SBSgain', 'dataset', 'dset4');
+        end
+
         fprintf(['SBSgain @' num2str(freqAcous) 'GHz is ' num2str(SBSgain(i)) '\n']);
 
         if i > 1
 
-            if (SBSgain(i) > SBSgain(i - 1)) || (SBSgain(i) < gainCenter)
+            if (SBSgain(i) > SBSgain(i - 1)) || ((SBSgain(i) < gainCenter) && (freqAcous > freqCenter))
                 FLAG2 = ~FLAG2;
             end
 

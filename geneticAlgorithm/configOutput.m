@@ -31,7 +31,7 @@
     coarseFreq = zeros(1, 20);
     freqCenter = 0;
 
-    for i = 1:20
+    for i = 1:2
         coarseFreq(i) = 14.0 - 0.1 * i;
         model.param.set('freq_acous', [num2str(coarseFreq(i)) ' [GHz]']);
         model.study('std2').run();
@@ -50,7 +50,7 @@
     % If we cannot find Brillouin gain larger than 0.1, than give up that candidate
     if freqCenter == 0
         [maxGain.gain, maxGainLoc] = max(coarseGain);
-        maxGain.freq = coarseFreq(gainCenterLoc);
+        maxGain.freq = coarseFreq(maxGainLoc);
         return
     end
 

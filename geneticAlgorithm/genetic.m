@@ -14,7 +14,7 @@ tintSpan = linspace(200, 700, 51);
 tcSpan = linspace(7, 8, 51);
 wSpan = linspace(500, 5000, 46);
 
-population = 6; % Population for the genetic evolution
+population = 200; % Population for the genetic evolution
 candidates = table(zeros(population, 1), zeros(population, 1), ...
     zeros(population, 1), zeros(population, 1), zeros(population, 1), zeros(population, 1)); % table that store the geometry of the candidates
 candidates.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
@@ -62,7 +62,7 @@ for singleRound = 1:rounds
     % Select half of the candidates with the highest gain
     [~, index] = unique(candidates(:, [1, 2, 3, 4]), 'stable');
     candidates = candidates(index, :);
-    [~, index2] = maxk(candidates.gain, population / 2);
+    [~, index2] = maxk(candidates.gain, population * 0.4);
     elites = candidates(index2, :);
 
     % Display the infomation of the maximum gain
@@ -72,7 +72,7 @@ for singleRound = 1:rounds
     fprintf(['t_g@' num2str(champion.tg) 'nm;\t t_int@' num2str(champion.tint) ...
             'nm;\t t_c@' num2str(champion.tc * 1000) 'nm;\t w@' num2str(champion.w) 'nm;\n\n']);
 
-    if height(elites) < height(candidates) / 2
+    if height(elites) < population * 0.4
         disp('error');
     end
 
@@ -119,7 +119,19 @@ for singleRound = 1:rounds
 
     end
 
-    candidates = [elites; kids]; % candidates for the next generation
+    % new samples (foreigners) generated randomly
+    foreigners = zeros(population * 0.2, width(kids));
+    foreigners = array2table(foreigners);
+    foreigners.Properties.VariableNames = {'tg' 'tint' 'tc' 'w' 'gain' 'freq'};
+
+    for i = 1:height(foreigners)
+        foreigners.tg(i) = tgSpan(randi(length(tgSpan)));
+        foreigners.tint(i) = tintSpan(randi(length(tintSpan)));
+        foreigners.tc(i) = tcSpan(randi(length(tcSpan)));
+        foreigners.w(i) = wSpan(randi(length(wSpan)));
+    end
+
+    candidates = [elites; kids; foreigners]; % candidates for the next generation
     currentSamples = table2array(samples); % Export the up-to-date results
     writematrix(currentSamples, 'uptoDateResults.csv');
 end
