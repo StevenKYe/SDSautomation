@@ -1,16 +1,16 @@
- % Run Comsol server with this command:
+% Run Comsol server with this command:
 % "C:\Program Files\COMSOL\COMSOL56\Multiphysics\bin\win64\comsolmphserver.exe" -port 12345 -autosave off
 % MATLAB function to run the COMSOL model with certain parameters once
 
-function maxGain = runCOMSOL(geom)
+function gain = runCOMSOL(geom)
     %myFun - Description
     %
     % Syntax: maxGain = runCOMSOL(geom)
     % Geometry configuration example:
-    % geom.w = 4200; % Width of the chip
-    % geom.tint = 450; % Seperation between the two stripes
-    % geom.tintup = 250; % Distance from the bottom boundary of the upper stripe to the center of the chip, unit: nm
-    % geom.tg = 180; % Thickness of the stripe, unit: nm
+    % w = 4200; % Width of the chip
+    % tint = 450; % Seperation between the two stripes
+    % tintup = 250; % Distance from the bottom boundary of the upper stripe to the center of the chip, unit: nm
+    % tg = 180; % Thickness of the stripe, unit: nm
 
     format long;
 
@@ -21,11 +21,15 @@ function maxGain = runCOMSOL(geom)
     model.sol('sol3').clearSolutionData();
 
     % Config the COMSOL model and trial run the optical model
-    model = configParas(model, geom);
+    tg = geom(1);
+    tint = geom(2);
+    tc = geom(3);
+    w = geom(4);
+    model = configParas(model, tg, tint, tc, w);
     model.param.set('freq_acous', [num2str(13.5) ' [GHz]']);
     fprintf('Configurations of the running model\n');
-    fprintf(['Width: ' num2str(geom.w) ' nm\t' 'Distance to center: ' num2str(geom.tg + geom.tint) ' nm\t' 'Thickness: ' num2str(geom.tg) ' nm\n']);
-    fprintf(['Seperation: ' num2str(geom.tint) ' nm\t' 'Top cladding thickness: ' num2str(geom.tc * 1000) ' nm\n\n']);
+    fprintf(['Width: ' num2str(w) ' nm\t' 'Distance to center: ' num2str(tg + tint) ' nm\t' 'Thickness: ' num2str(tg) ' nm\n']);
+    fprintf(['Seperation: ' num2str(tint) ' nm\t' 'Top cladding thickness: ' num2str(tc * 1000) ' nm\n\n']);
     model.study('std1').run();
 
     % Croase sweeping
@@ -33,7 +37,7 @@ function maxGain = runCOMSOL(geom)
     coarseFreq = zeros(1, 20);
     freqCenter = 0;
 
-    for i = 1:20
+    for i = 1:22
         coarseFreq(i) = 14.0 - 0.1 * i;
         model.param.set('freq_acous', [num2str(coarseFreq(i)) ' [GHz]']);
         model.study('std2').run();
@@ -96,7 +100,8 @@ function maxGain = runCOMSOL(geom)
 
     end
 
-    writematrix([freqSpan.', SBSgain.'], ['results\frequencySweep\w' num2str(geom.w) '_tint' num2str(geom.tint) '_tg' num2str(geom.tg) '_tc' num2str(geom.tc * 1000) '.csv']);
-    clear model;
+    gain = maxGain.gain;
 
+    writematrix([freqSpan.', SBSgain.'], ['results\w' num2str(w) '_tint' num2str(tint) '_tg' num2str(tg) '_tc' num2str(tc * 1000) '.csv']);
+    clear model;
 end
